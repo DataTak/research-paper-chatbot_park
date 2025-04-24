@@ -1,0 +1,7 @@
+.env
+# Chroma Vector DB (자동 생성 캐시)
+data/vector_db/
+
+# 논문 PDF 파일들
+data/papers/data/vector_db/
+data/papers/

@@ -1,0 +1,9 @@
+streamlit
+langchain
+langchain-google-genai
+chromadb
+sentence-transformers
+pypdf
+python-docx
+langgraph
+pyparsing
