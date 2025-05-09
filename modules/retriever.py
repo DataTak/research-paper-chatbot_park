@@ -1,11 +1,18 @@
 import os
 from typing import List, Optional
+import sys
+import sqlite3
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.schema import Document
 from langchain.vectorstores.base import VectorStoreRetriever
 from dotenv import load_dotenv
 import torch
+
+# SQLite 버전 확인 및 업그레이드
+if sqlite3.sqlite_version_info < (3, 35, 0):
+    __import__('pysqlite3')
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 # Load environment variables
 load_dotenv()
