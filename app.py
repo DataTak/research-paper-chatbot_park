@@ -12,12 +12,13 @@ load_dotenv()
 st.set_page_config(page_title="📚 학술 논문 기반 챗봇", page_icon="📘")
 
 # S3 매니저 초기화 및 DB 다운로드
-@st.cache_resource
 def initialize_s3_and_db():
-    s3_manager = S3Manager()
+    if 's3_manager' not in st.session_state:
+        st.session_state.s3_manager = S3Manager()
+    
     db_path = "data/temp_vector_db/chroma.sqlite3"
-    s3_manager.download_db_if_needed(db_path)
-    return s3_manager, db_path
+    st.session_state.s3_manager.download_db_if_needed(db_path)
+    return st.session_state.s3_manager, db_path
 
 s3_manager, db_path = initialize_s3_and_db()
 
@@ -42,8 +43,8 @@ with st.sidebar:
     if st.button("💾 대화 초기화"):
         st.session_state.chat_history = []
         
-    if st.button("🔄 DB 새로고침"):
-        s3_manager.download_db_if_needed(db_path)
+    if st.button("�� DB 새로고침"):
+        st.session_state.s3_manager.download_db_if_needed(db_path, force_download=True)
         st.success("DB가 새로고침되었습니다!")
 
 # 기존 대화 표시

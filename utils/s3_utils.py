@@ -21,12 +21,11 @@ class S3Manager:
             region_name=self.region
         )
 
-    @st.cache_resource
-    def download_db_if_needed(self, local_path: str = "data/temp_vector_db/chroma.sqlite3") -> bool:
-        """벡터 DB를 S3에서 다운로드 (캐시 사용)"""
+    def download_db_if_needed(self, local_path: str = "data/temp_vector_db/chroma.sqlite3", force_download: bool = False) -> bool:
+        """벡터 DB를 S3에서 다운로드"""
         try:
             os.makedirs(os.path.dirname(local_path), exist_ok=True)
-            if not os.path.exists(local_path):
+            if not os.path.exists(local_path) or force_download:
                 self.s3.download_file(self.bucket, "vector_db/chroma.sqlite3", local_path)
                 st.success("Vector DB downloaded successfully!")
             return True
