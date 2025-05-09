@@ -7,7 +7,6 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.schema import Document
 from langchain.vectorstores.base import VectorStoreRetriever
 from dotenv import load_dotenv
-import torch
 
 # SQLite 버전 확인 및 업그레이드
 if sqlite3.sqlite_version_info < (3, 35, 0):
@@ -22,18 +21,26 @@ EMBEDDING_MODEL_NAME = "BAAI/bge-m3"
 
 class Retriever:
     def __init__(self):
-        self.embedding_model = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL_NAME,
-            model_kwargs={
-                "device": "cpu",
-                "use_auth_token": HF_TOKEN
-            },
-            encode_kwargs={"normalize_embeddings": True}
-        )
-        self.vectorstore = Chroma(
-            persist_directory=VECTOR_DB_DIR,
-            embedding_function=self.embedding_model
-        )
+        # 임베딩 모델 초기화 방식 변경
+        model_kwargs = {
+            "device": "cpu",
+            "use_auth_token": HF_TOKEN
+        }
+        encode_kwargs = {"normalize_embeddings": True}
+        
+        try:
+            self.embedding_model = HuggingFaceEmbeddings(
+                model_name=EMBEDDING_MODEL_NAME,
+                model_kwargs=model_kwargs,
+                encode_kwargs=encode_kwargs
+            )
+            self.vectorstore = Chroma(
+                persist_directory=VECTOR_DB_DIR,
+                embedding_function=self.embedding_model
+            )
+        except Exception as e:
+            print(f"Error initializing embeddings: {str(e)}")
+            raise
 
     # 기본 검색 (단순 유사도 기반)
     def query_similar_documents(self, query: str, k: int = 10) -> List[Document]:
