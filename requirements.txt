@@ -1,7 +1,8 @@
 streamlit==1.32.0
 langchain>=0.0.350
-langchain-community>=0.0.44
-langchain-core>=0.1.52
+langchain-community==0.0.44
+langchain-core==0.1.52
+langchain-google-genai==0.0.11
 chromadb==0.4.17
 sentence-transformers==2.5.1
 pypdf==4.0.1
