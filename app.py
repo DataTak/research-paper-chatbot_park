@@ -3,8 +3,23 @@ import streamlit as st
 from modules.retriever import Retriever
 from modules.llm_chain import LLMAnswerGenerator, is_meta_request
 from modules.vector_store_builder import list_all_titles
+from utils.s3_utils import S3Manager
+from dotenv import load_dotenv
 
+load_dotenv()
+
+# 페이지 설정
 st.set_page_config(page_title="📚 학술 논문 기반 챗봇", page_icon="📘")
+
+# S3 매니저 초기화 및 DB 다운로드
+@st.cache_resource
+def initialize_s3_and_db():
+    s3_manager = S3Manager()
+    db_path = "data/temp_vector_db/chroma.sqlite3"
+    s3_manager.download_db_if_needed(db_path)
+    return s3_manager, db_path
+
+s3_manager, db_path = initialize_s3_and_db()
 
 st.title("📘 박박사님 경제논문 저장소 챗봇")
 st.markdown("영어 논문을 기반으로 한국어로 정확하고 출처가 달린 답변을 제공합니다.\n등록된 논문들이 궁금하면 \"등록된 논문 제목 알려줘\" 라고 물어보세요.")
@@ -13,6 +28,7 @@ st.markdown("영어 논문을 기반으로 한국어로 정확하고 출처가 �
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+# Retriever 및 LLM 초기화
 retriever = Retriever()
 llm = LLMAnswerGenerator()
 
@@ -21,10 +37,14 @@ with st.sidebar:
     st.header("🔧 시스템 정보")
     st.markdown("- 검색 모델: `BAAI/bge-m3`")
     st.markdown("- 답변 모델: `Gemini-2.0-flash`")
-    st.markdown("- 저장소: `Chroma`")
-    st.markdown("---")
+    st.markdown("- 저장소: `AWS S3 + Chroma`")
+    
     if st.button("💾 대화 초기화"):
         st.session_state.chat_history = []
+        
+    if st.button("🔄 DB 새로고침"):
+        s3_manager.download_db_if_needed(db_path)
+        st.success("DB가 새로고침되었습니다!")
 
 # 기존 대화 표시
 for entry in st.session_state.chat_history:

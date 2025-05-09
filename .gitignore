@@ -1,7 +1,37 @@
 .env
 # Chroma Vector DB (자동 생성 캐시)
 data/vector_db/
+data/temp_vector_db/
 
 # 논문 PDF 파일들
 data/papers/data/vector_db/
 data/papers/
+data/*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
