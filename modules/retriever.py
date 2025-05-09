@@ -17,7 +17,7 @@ if sqlite3.sqlite_version_info < (3, 35, 0):
 # Load environment variables
 load_dotenv()
 HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
-VECTOR_DB_DIR = "data/vector_db"
+VECTOR_DB_DIR = "data/temp_vector_db"
 EMBEDDING_MODEL_NAME = "BAAI/bge-m3"
 
 class Retriever:
@@ -25,7 +25,7 @@ class Retriever:
         self.embedding_model = HuggingFaceEmbeddings(
             model_name=EMBEDDING_MODEL_NAME,
             model_kwargs={
-                "device": "cuda:0" if torch.cuda.is_available() else "cpu",
+                "device": "cpu",
                 "use_auth_token": HF_TOKEN
             },
             encode_kwargs={"normalize_embeddings": True}
@@ -84,27 +84,25 @@ class Retriever:
         return f"이 질문은 다음과 같은 의미를 가집니다: {query}. 관련 연구 논문이나 사례 중심으로 검색해 주세요."
 
     # 전체 타이틀 목록
-    @staticmethod
-    def list_all_titles(vector_db_path: str) -> List[str]:
-        embedding_model = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL_NAME,
-            model_kwargs={"device": "cpu", "use_auth_token": HF_TOKEN},
-            encode_kwargs={"normalize_embeddings": True}
-        )
-        db = Chroma(persist_directory=vector_db_path, embedding_function=embedding_model)
-        all_docs = db.get(include=["metadatas"])
+    def list_all_titles(self) -> List[str]:
+        """벡터 DB에서 모든 논문 제목을 가져옵니다."""
+        try:
+            all_docs = self.vectorstore.get(include=["metadatas"])
+            
+            seen = set()
+            unique_titles = []
 
-        seen = set()
-        unique_titles = []
+            for metadata in all_docs["metadatas"]:
+                title = metadata.get("title", "Unknown").strip()
+                authors = metadata.get("authors", "").strip()
+                year = metadata.get("year", "n.d.")
+                key = f"{title}_{authors}"
 
-        for metadata in all_docs["metadatas"]:
-            title = metadata.get("title", "Unknown").strip()
-            authors = metadata.get("authors", "").strip()
-            year = metadata.get("year", "n.d.")
-            key = f"{title}_{authors}"
+                if key not in seen:
+                    seen.add(key)
+                    unique_titles.append(f'"{title}" ({authors}, {year})')
 
-            if key not in seen:
-                seen.add(key)
-                unique_titles.append(f'"{title}" ({authors}, {year})')
-
-        return unique_titles
+            return unique_titles
+        except Exception as e:
+            print(f"Error in list_all_titles: {str(e)}")
+            return []
