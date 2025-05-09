@@ -2,11 +2,13 @@
 # Chroma Vector DB (자동 생성 캐시)
 data/vector_db/
 data/temp_vector_db/
+data/vector_db.zip
+data/*.zip
 
 # 논문 PDF 파일들
-data/papers/data/vector_db/
 data/papers/
-data/*.zip
+data/backuppaper/
+data/sessions/
 
 # Python
 __pycache__/
@@ -35,3 +37,13 @@ var/
 .idea/
 *.swp
 *.swo
+
+# Large files
+*.zip
+*.gz
+*.tar
+*.rar
+*.7z
+*.db
+*.sqlite
+*.sqlite3
